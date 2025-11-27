@@ -1,4 +1,4 @@
-import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listings } from "@/lib/mockData";
@@ -6,8 +6,8 @@ import { Plus, Home, MessageSquare, Calendar, Settings, Trash2, Edit } from "luc
 
 export default function HostDashboard() {
   return (
-    <div className="min-h-screen bg-muted/10 pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-muted/10 pb-20 pl-[4.5rem]">
+      <Sidebar />
       
       <main className="container mx-auto px-4 pt-8">
         <div className="flex justify-between items-center mb-8">

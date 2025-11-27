@@ -1,4 +1,4 @@
-import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
 import PostCard from "@/components/community/PostCard";
 import CreatePost from "@/components/community/CreatePost";
 import { posts, currentUser, users } from "@/lib/communityData";
@@ -11,8 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Community() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-background pl-[4.5rem]">
+      <Sidebar />
       
       <main className="container mx-auto px-4 pt-6 pb-20 max-w-6xl flex gap-8 justify-center">
         

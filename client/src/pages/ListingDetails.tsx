@@ -1,6 +1,6 @@
 import { useParams } from "wouter";
 import { listings } from "@/lib/mockData";
-import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -27,8 +27,8 @@ export default function ListingDetails() {
   if (!listing) return <div>Listing not found</div>;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-background pb-20 pl-[4.5rem]">
+      <Sidebar />
       
       <main className="container mx-auto px-4 pt-6 max-w-6xl">
         {/* Title Header */}

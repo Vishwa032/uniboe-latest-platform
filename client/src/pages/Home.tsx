@@ -1,4 +1,5 @@
-import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import TopSearch from "@/components/layout/TopSearch";
 import ListingCard from "@/components/listing/ListingCard";
 import ListingFilters from "@/components/listing/ListingFilters";
 import { listings } from "@/lib/mockData";
@@ -8,8 +9,9 @@ import heroImage from '@assets/generated_images/modern_university_housing_exteri
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-background pb-20 pl-[4.5rem]">
+      <Sidebar />
+      <TopSearch />
       
       {/* Hero Section (Optional, but good for "Student" branding) */}
       <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden hidden md:block">
