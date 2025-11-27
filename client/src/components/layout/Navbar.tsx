@@ -73,7 +73,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <Link href="/host">
             <Button variant="ghost" className="hidden md:flex rounded-full font-medium hover:bg-muted text-sm px-4">
-              Switch to hosting
+              Switch to subletting
             </Button>
           </Link>
           
