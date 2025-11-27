@@ -17,16 +17,7 @@ export default function HostDashboard() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Earnings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$12,450</div>
-              <p className="text-xs text-muted-foreground">+18% from last month</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active Listings</CardTitle>
