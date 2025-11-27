@@ -71,18 +71,6 @@ export default function Navbar() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          <Link href="/community">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted h-10 w-10 hidden md:flex" title="Community">
-               <Users className="h-5 w-5" />
-            </Button>
-          </Link>
-          
-          <Link href="/messages">
-            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted h-10 w-10 hidden md:flex" title="Messages">
-               <MessageCircle className="h-5 w-5" />
-            </Button>
-          </Link>
-
           <Link href="/host">
             <Button variant="ghost" className="hidden md:flex rounded-full font-medium hover:bg-muted text-sm px-4">
               Switch to subletting

@@ -1,5 +1,5 @@
 import Sidebar from "@/components/layout/Sidebar";
-import TopSearch from "@/components/layout/TopSearch";
+import Navbar from "@/components/layout/Navbar";
 import ListingCard from "@/components/listing/ListingCard";
 import ListingFilters from "@/components/listing/ListingFilters";
 import { listings } from "@/lib/mockData";
@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-20 pl-[4.5rem]">
       <Sidebar />
-      <TopSearch />
+      <Navbar />
       
       {/* Hero Section (Optional, but good for "Student" branding) */}
       <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden hidden md:block">
