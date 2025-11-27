@@ -29,9 +29,9 @@ export default function Navbar() {
 
         {/* Search Bar - Desktop */}
         <div className="hidden md:flex items-center rounded-full border shadow-sm hover:shadow-md transition-shadow px-4 py-2.5 gap-4 cursor-pointer">
-          <span className="text-sm font-medium pl-2">Anywhere</span>
+          <span className="text-sm font-medium pl-2">Which university?</span>
           <span className="h-4 w-[1px] bg-border"></span>
-          <span className="text-sm font-medium">Any week</span>
+          <span className="text-sm font-medium">Move-in</span>
           <span className="h-4 w-[1px] bg-border"></span>
           <span className="text-sm text-muted-foreground">Add guests</span>
           <div className="bg-primary rounded-full p-2 text-primary-foreground ml-2">
