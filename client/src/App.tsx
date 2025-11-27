@@ -8,11 +8,15 @@ import Home from "@/pages/Home";
 import ListingDetails from "@/pages/ListingDetails";
 import Auth from "@/pages/Auth";
 import HostDashboard from "@/pages/HostDashboard";
+import Community from "@/pages/Community";
+import Messages from "@/pages/Messages";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/community" component={Community} />
+      <Route path="/messages" component={Messages} />
       <Route path="/listing/:id" component={ListingDetails} />
       <Route path="/auth" component={Auth} />
       <Route path="/host" component={HostDashboard} />
