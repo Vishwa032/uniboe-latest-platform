@@ -104,18 +104,28 @@ export default function Navbar() {
       </div>
 
       {/* Search Bar - Desktop (Modified) */}
-      <div className="hidden md:flex items-center w-full max-w-[600px] rounded-full border shadow-sm hover:shadow-md transition-all bg-background pl-8 pr-2 h-[66px] cursor-pointer mt-2 border-muted-foreground/20 relative group">
+      <div className="hidden md:flex items-center w-full max-w-[800px] rounded-full border shadow-sm hover:shadow-md transition-all bg-background pl-8 pr-2 h-[66px] cursor-pointer mt-2 border-muted-foreground/20 relative group">
         
-        <div className="flex-1 flex flex-col justify-center h-full">
+        <div className="flex-1 flex flex-col justify-center h-full border-r pr-4">
            <label className="text-xs font-extrabold px-1 text-foreground">Where</label>
            <input 
              type="text" 
-             placeholder="Search destinations" 
-             className="w-full text-sm text-muted-foreground outline-none bg-transparent px-1 placeholder:text-muted-foreground"
+             placeholder="Search apartments near your university" 
+             className="w-full text-sm text-muted-foreground outline-none bg-transparent px-1 placeholder:text-muted-foreground overflow-ellipsis"
            />
         </div>
+
+        <div className="flex items-center gap-2 px-4">
+           <Button variant="ghost" className="rounded-full h-9 text-xs font-semibold px-4 hover:bg-muted">
+             University
+           </Button>
+           <div className="h-6 w-[1px] bg-border"></div>
+           <Button variant="ghost" className="rounded-full h-9 text-xs font-semibold px-4 hover:bg-muted">
+             City
+           </Button>
+        </div>
         
-        <div className="bg-primary rounded-full p-4 text-primary-foreground ml-4 hover:bg-primary/90 transition-colors aspect-square flex items-center justify-center h-[48px] w-[48px]">
+        <div className="bg-primary rounded-full p-4 text-primary-foreground ml-2 hover:bg-primary/90 transition-colors aspect-square flex items-center justify-center h-[48px] w-[48px]">
           <Search className="h-5 w-5 font-bold stroke-[3px]" />
         </div>
       </div>
