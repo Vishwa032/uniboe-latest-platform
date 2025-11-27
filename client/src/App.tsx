@@ -10,11 +10,13 @@ import Auth from "@/pages/Auth";
 import HostDashboard from "@/pages/HostDashboard";
 import Community from "@/pages/Community";
 import Messages from "@/pages/Messages";
+import Olive from "@/pages/Olive";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/olive" component={Olive} />
       <Route path="/community" component={Community} />
       <Route path="/messages" component={Messages} />
       <Route path="/listing/:id" component={ListingDetails} />

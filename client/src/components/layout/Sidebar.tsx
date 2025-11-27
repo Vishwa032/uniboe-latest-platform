@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Users, MessageCircle, Menu, Settings, LogOut, PlusSquare, Building, Building2 } from "lucide-react";
+import { Home, Users, MessageCircle, Menu, Settings, LogOut, PlusSquare, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,7 @@ export default function Sidebar() {
 
   const navItems = [
     { icon: Home, label: "Home", href: "/" },
+    { icon: Sparkles, label: "Olive AI", href: "/olive" },
     { icon: Users, label: "Community", href: "/community" },
     { icon: MessageCircle, label: "Messages", href: "/messages" },
     { icon: PlusSquare, label: "Sublet", href: "/host" },
