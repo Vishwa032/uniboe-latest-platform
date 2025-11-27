@@ -1,0 +1,68 @@
+Create a full-stack student housing listing platform with an Airbnb-inspired UI. 
+
+FRONTEND REQUIREMENTS:
+- Build a React application with the following pages:
+  1. Home/Search page with filters (location, price range, bedrooms, move-in date)
+  2. Detailed listing page matching Airbnb's design aesthetic
+  3. User authentication (sign up/login)
+  4. Host dashboard to manage listings
+  
+- For the listing detail page, include:
+  * Full-width image gallery with thumbnail navigation
+  * Sticky booking card with pricing breakdown
+  * Key features grid (bedrooms, bathrooms, area, availability)
+  * Amenities section with icons
+  * Reviews with ratings and user avatars
+  * Interactive map showing approximate location
+  * Host profile with response time and rating
+  * Security deposit and total cost calculator
+  
+- Use Tailwind CSS for styling
+- Make it fully responsive (mobile, tablet, desktop)
+- Add smooth animations and hover effects
+- Use Lucide React or React Icons for icons
+
+BACKEND REQUIREMENTS:
+- Set up Node.js/Express server with PostgreSQL database
+- Create the following database tables:
+  * users (students and landlords)
+  * listings (properties)
+  * reviews
+  * bookings
+  * amenities
+  * images
+  
+- Implement REST API endpoints:
+  * GET /api/listings - fetch all listings with filters
+  * GET /api/listings/:id - fetch single listing details
+  * POST /api/listings - create new listing (landlord only)
+  * PUT /api/listings/:id - update listing
+  * DELETE /api/listings/:id - delete listing
+  * POST /api/reviews - submit review
+  * GET /api/reviews/:listingId - fetch reviews for a listing
+  * POST /api/bookings - create booking request
+  * Authentication endpoints (register, login, logout)
+
+- Add authentication using JWT tokens
+- Implement image upload with Cloudinary or similar service
+- Add input validation and error handling
+
+ADDITIONAL FEATURES:
+- Search functionality with filters (price, bedrooms, location, amenities)
+- Favorites/wishlist system
+- Messaging system between students and landlords
+- Email notifications for bookings and messages
+- Price comparison showing savings
+- Verified listing badges
+- Student-specific features (university proximity, academic calendar lease terms)
+
+SAMPLE DATA:
+Include 5-10 sample listings near major universities (NYU, Columbia, Boston University) with realistic data including:
+- Multiple high-quality images per listing
+- Detailed descriptions
+- Various price points ($1500-$6000/month)
+- Different property types (studio, 1BR, 2BR, 3BR)
+- Mix of reviews (4-5 star ratings)
+- Different availability dates
+
+Start with the frontend listing detail page first, then build the backend API, then connect them together. Use modern best practices and make the code production-ready.
