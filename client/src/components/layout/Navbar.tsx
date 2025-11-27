@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Search, Menu, Home, Building2 } from "lucide-react";
+import { Search, Menu, Home, Building2, Building } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +42,18 @@ export default function Navbar() {
             <Home className={cn("h-6 w-6", activeTab === "homes" ? "stroke-[2.5px]" : "stroke-2")} />
             <span className="text-xs">Homes</span>
             {activeTab === "homes" && <div className="h-0.5 w-[120%] bg-foreground animate-in fade-in zoom-in duration-300 mt-2" />}
+          </div>
+
+          <div 
+            className={cn(
+              "flex flex-col items-center gap-2 cursor-pointer group hover:text-foreground/80 transition-colors px-2",
+              activeTab === "apartments" ? "text-foreground font-semibold" : "text-muted-foreground opacity-70 hover:opacity-100"
+            )}
+             onClick={() => setActiveTab("apartments")}
+          >
+            <Building className={cn("h-6 w-6", activeTab === "apartments" ? "stroke-[2.5px]" : "stroke-2")} />
+            <span className="text-xs">Apartments</span>
+            {activeTab === "apartments" && <div className="h-0.5 w-[120%] bg-foreground animate-in fade-in zoom-in duration-300 mt-2" />}
           </div>
           
           <div 
@@ -110,7 +122,7 @@ export default function Navbar() {
            <label className="text-xs font-extrabold px-1 text-foreground">Where</label>
            <input 
              type="text" 
-             placeholder="Search apartments near your university" 
+             placeholder="Search housing near your university" 
              className="w-full text-sm text-muted-foreground outline-none bg-transparent px-1 placeholder:text-muted-foreground overflow-ellipsis"
            />
         </div>
