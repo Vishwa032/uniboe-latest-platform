@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Users, MessageCircle, Menu, Settings, LogOut, PlusSquare, Sparkles } from "lucide-react";
+import { Home, Users, MessageCircle, Menu, Settings, LogOut, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,17 +10,57 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, endpoints, clearAuthToken } from "@/lib/api";
 
 export default function Sidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
+  // Fetch current user profile
+  const { data: user, error, isLoading } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => api.get(endpoints.auth.me),
+    retry: false,
+  });
+
+  // Debug logging
+  if (error) {
+    console.log('Sidebar auth error:', error);
+  }
+  if (user) {
+    console.log('Sidebar user data:', user);
+  }
 
   const navItems = [
-    { icon: Home, label: "Home", href: "/" },
-    { icon: Sparkles, label: "Olive AI", href: "/olive" },
+    { icon: Home, label: "Housing", href: "/housing" },
+    { icon: Sparkles, label: "SAGE", href: "/olive" },
     { icon: Users, label: "Community", href: "/community" },
     { icon: MessageCircle, label: "Messages", href: "/messages" },
-    { icon: PlusSquare, label: "Sublet", href: "/host" },
   ];
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: () => api.post(endpoints.auth.logout),
+    onSuccess: () => {
+      // Clear token and query cache
+      clearAuthToken();
+      queryClient.clear();
+      // Redirect to auth page
+      setLocation('/auth');
+    },
+    onError: (error) => {
+      console.error('Logout failed:', error);
+      // Even if backend logout fails, clear local state
+      clearAuthToken();
+      queryClient.clear();
+      setLocation('/auth');
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <div className="fixed left-0 top-0 h-screen z-50 flex flex-col bg-background/80 backdrop-blur-xl border-r shadow-2xl transition-all duration-300 ease-in-out w-[4.5rem] hover:w-64 group overflow-hidden">
@@ -40,12 +80,12 @@ export default function Sidebar() {
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <div 
+              <div
                 className={cn(
                   "flex items-center h-12 px-3 rounded-xl cursor-pointer transition-all duration-200 group/item",
-                  isActive 
-                    ? "bg-primary/10 text-primary" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-foreground hover:bg-muted hover:text-primary"
                 )}
               >
                 <item.icon className={cn(
@@ -85,17 +125,22 @@ export default function Sidebar() {
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>
               <div className="ml-3 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden">
-                <span className="text-sm font-bold truncate">Alex Student</span>
-                <span className="text-xs text-muted-foreground truncate">@alex_studies</span>
+                <span className="text-sm font-bold truncate">{user?.full_name || 'Guest'}</span>
+                <span className="text-xs text-muted-foreground truncate">@{user?.username || 'user'}</span>
               </div>
               <Menu className="ml-auto h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100" />
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" side="right" className="w-56 ml-4">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <Link href="/profile">
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+            </Link>
             <DropdownMenuItem>My Listings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive focus:text-destructive cursor-pointer"
+            >
               <LogOut className="mr-2 h-4 w-4" /> Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

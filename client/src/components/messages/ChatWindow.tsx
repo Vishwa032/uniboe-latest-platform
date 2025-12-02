@@ -1,23 +1,88 @@
-import { Conversation, currentUser, Message } from "@/lib/communityData";
+import { Conversation, Message } from "@/lib/communityData";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, Video, MoreVertical, Send, Paperclip, Smile, Check, CheckCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, endpoints } from "@/lib/api";
 
 interface ChatWindowProps {
   conversation: Conversation;
 }
 
 export default function ChatWindow({ conversation }: ChatWindowProps) {
+  const queryClient = useQueryClient();
+
+  // Handle different data formats from backend (cast to any for flexibility)
+  const convData = conversation as any;
+
+  // Backend uses other_participant, mock uses participant
+  const participant = conversation?.participant || (convData?.other_participant ? {
+    id: convData.other_participant.id || 'unknown',
+    name: convData.other_participant.full_name || 'Unknown User',
+    avatar: convData.other_participant.profile_picture_url || 'https://github.com/shadcn.png',
+    online: false
+  } : {
+    id: 'unknown',
+    name: 'Unknown User',
+    avatar: 'https://github.com/shadcn.png',
+    online: false
+  });
+
   const [messageText, setMessageText] = useState("");
-  const [messages, setMessages] = useState<Message[]>(conversation.messages);
+  const [messages, setMessages] = useState<Message[]>(conversation.messages || []);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Fetch current user to identify which messages are "mine"
+  const { data: currentUser } = useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: () => api.get(endpoints.auth.me),
+    retry: false,
+  });
+
+  // Fetch messages from backend if conversation doesn't have messages array
+  const { data: backendMessages, isLoading, error: messagesError } = useQuery({
+    queryKey: ['chat', 'messages', conversation.id],
+    queryFn: () => api.get(endpoints.chat.messages(conversation.id)),
+    retry: false,
+    enabled: !conversation.messages || conversation.messages.length === 0,
+  });
+
+  // Debug logging
+  if (messagesError) {
+    console.log('ChatWindow messages error:', messagesError);
+  }
+  if (backendMessages) {
+    console.log('ChatWindow messages from backend:', backendMessages);
+  }
+
+  // Update messages when conversation changes or backend data arrives
   useEffect(() => {
-    setMessages(conversation.messages);
-  }, [conversation]);
+    if (conversation.messages && conversation.messages.length > 0) {
+      // Use mock messages
+      setMessages(conversation.messages);
+    } else if (backendMessages) {
+      // Convert backend messages to Message format
+      // Backend might return {messages: [...]} or direct array
+      const msgArray = backendMessages.messages || backendMessages.data || (Array.isArray(backendMessages) ? backendMessages : []);
+      console.log('Converting messages:', msgArray);
+
+      const convertedMessages = msgArray.map((msg: any) => ({
+        id: msg.id,
+        senderId: msg.sender_id,
+        text: msg.content,
+        timestamp: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: msg.is_read ? 'read' : 'delivered',
+      }));
+
+      // Backend returns messages newest first (DESC), reverse for chat display (oldest first)
+      const orderedMessages = convertedMessages.reverse();
+      console.log('Converted messages (oldest first):', orderedMessages);
+      setMessages(orderedMessages);
+    }
+  }, [conversation, backendMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -25,30 +90,47 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
     }
   }, [messages]);
 
-  const handleSend = () => {
+  // Mutation for sending messages
+  const sendMessageMutation = useMutation({
+    mutationFn: (content: string) =>
+      api.post(endpoints.chat.send(conversation.id), { content }),
+    onSuccess: (data) => {
+      console.log('Message sent successfully:', data);
+      // Invalidate messages query to refetch
+      queryClient.invalidateQueries({ queryKey: ['chat', 'messages', conversation.id] });
+      queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
+    },
+    onError: (error) => {
+      console.error('Failed to send message:', error);
+      // TODO: Show error toast to user
+    },
+  });
+
+  const handleSend = async () => {
     if (!messageText.trim()) return;
-    
-    const newMessage: Message = {
-      id: `new-${Date.now()}`,
+
+    const messageContent = messageText.trim();
+    setMessageText(""); // Clear input immediately for better UX
+
+    // Optimistically add message to UI
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
       senderId: 'me',
-      text: messageText,
+      text: messageContent,
       timestamp: 'Just now',
       status: 'sent',
     };
 
-    setMessages([...messages, newMessage]);
-    setMessageText("");
+    setMessages(prev => [...prev, optimisticMessage]);
 
-    // Mock reply
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        id: `reply-${Date.now()}`,
-        senderId: conversation.participant.id,
-        text: "This is a mock auto-reply! 👋",
-        timestamp: 'Just now',
-        status: 'delivered'
-      }]);
-    }, 2000);
+    // Send to backend
+    try {
+      await sendMessageMutation.mutateAsync(messageContent);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id));
+    }
   };
 
   return (
@@ -60,18 +142,21 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
       <div className="h-16 border-b flex items-center justify-between px-6 bg-background/80 backdrop-blur-md z-10 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="relative">
-             <Avatar className="h-10 w-10 border shadow-sm">
-              <AvatarImage src={conversation.participant.avatar} />
-              <AvatarFallback>{conversation.participant.name[0]}</AvatarFallback>
+             <Avatar className={cn(
+               "h-10 w-10 border shadow-sm",
+               participant.online && "ring-2 ring-secondary ring-offset-2 ring-offset-background"
+             )}>
+              <AvatarImage src={participant.avatar} />
+              <AvatarFallback>{participant.name[0]}</AvatarFallback>
             </Avatar>
-            {conversation.participant.online && (
+            {participant.online && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
             )}
           </div>
           <div>
-            <h3 className="font-bold text-sm">{conversation.participant.name}</h3>
+            <h3 className="font-bold text-sm">{participant.name}</h3>
             <p className="text-xs text-muted-foreground font-medium">
-              {conversation.participant.online ? 'Online' : 'Offline'}
+              {participant.online ? 'Online' : 'Offline'}
             </p>
           </div>
         </div>
@@ -92,8 +177,18 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6" ref={scrollRef}>
-        {messages.map((msg, index) => {
-          const isMe = msg.senderId === 'me';
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-muted-foreground">Loading messages...</div>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-muted-foreground">No messages yet. Start the conversation!</div>
+          </div>
+        ) : (
+          messages.map((msg, index) => {
+          // Check if message is from current user (handle both mock 'me' and real user ID)
+          const isMe = msg.senderId === 'me' || (currentUser && msg.senderId === currentUser.id);
           const isLast = index === messages.length - 1;
           
           return (
@@ -138,7 +233,7 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
 
       {/* Input Area */}
@@ -160,15 +255,19 @@ export default function ChatWindow({ conversation }: ChatWindowProps) {
             <Smile className="h-5 w-5" />
           </Button>
           
-          <Button 
+          <Button
             onClick={handleSend}
             disabled={!messageText.trim()}
             className={cn(
-              "h-10 w-10 rounded-full shrink-0 transition-all duration-200", 
-              messageText.trim() 
-                ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:scale-105 hover:shadow-lg" 
+              "h-10 w-10 rounded-full shrink-0 transition-all duration-200",
+              messageText.trim()
+                ? "shadow-md hover:scale-105 hover:shadow-lg"
                 : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
             )}
+            style={messageText.trim() ? {
+              backgroundColor: 'hsl(266, 45%, 80%)',
+              color: 'hsl(17, 22%, 34%)'
+            } : undefined}
             size="icon"
           >
             <Send className="h-5 w-5 ml-0.5" />

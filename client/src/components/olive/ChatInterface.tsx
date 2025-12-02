@@ -9,7 +9,6 @@ import PostCard from "@/components/community/PostCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Listing } from "@/lib/mockData";
 import { Post } from "@/lib/communityData";
-
 interface ChatInterfaceProps {
   sidebarOpen: boolean;
 }
@@ -45,15 +44,26 @@ export default function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
     };
 
     setMessages(prev => [...prev, userMsg]);
+    const messageContent = input;
     setInput("");
     setIsThinking(true);
 
+    // Use mock AI for now (backend returns text, we want rich content with post cards)
     try {
-      const response = await generateOliveResponse(userMsg.content);
+      const response = await generateOliveResponse(messageContent);
       setIsThinking(false);
       setMessages(prev => [...prev, response]);
-    } catch (error) {
+    } catch (mockError) {
       setIsThinking(false);
+      // Show error message
+      const errorMsg: OliveMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        type: 'text',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMsg]);
     }
   };
 
@@ -75,7 +85,7 @@ export default function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
             </div>
             <div className="space-y-2">
               <h1 className="text-4xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-                Hello, I'm Olive
+                Hello, I'm SAGE
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your personal student housing assistant. Ask me anything.
@@ -171,7 +181,7 @@ export default function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
                   handleSend();
                 }
               }}
-              placeholder="Ask Olive about housing, roommates, or campus life..."
+              placeholder="Ask SAGE about housing, roommates, or campus life..."
               className="w-full bg-transparent border-none focus:ring-0 resize-none min-h-[60px] max-h-[200px] p-4 text-base"
               rows={1}
             />
@@ -200,7 +210,7 @@ export default function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
             </div>
           </div>
           <p className="text-center text-[10px] text-muted-foreground mt-2">
-            Olive can make mistakes. Please verify important housing information.
+            SAGE can make mistakes. Please verify important housing information.
           </p>
         </div>
       </div>

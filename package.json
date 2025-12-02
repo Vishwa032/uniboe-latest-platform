@@ -5,11 +5,14 @@
   "license": "MIT",
   "scripts": {
     "dev:client": "vite dev --port 5000",
+    "dev:backend": "PYTHONPATH=. python -m uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev:all": "npm run dev:client & npm run dev:backend",
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "backend:install": "cd backend && pip install -r requirements.txt"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -55,6 +58,7 @@
     "express-session": "^1.18.1",
     "framer-motion": "^12.23.24",
     "input-otp": "^1.4.2",
+    "lightningcss": "^1.30.2",
     "lucide-react": "^0.545.0",
     "memorystore": "^1.6.7",
     "next-themes": "^0.4.6",

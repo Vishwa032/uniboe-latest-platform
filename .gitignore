@@ -1,6 +1,97 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+client/.env
+
+# Build outputs
+dist/
+build/
 *.tar.gz
+server/public/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.local/
+
+# Python specific
+*.py[cod]
+*$py.class
+*.so
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# TypeScript
+*.tsbuildinfo
+vite.config.ts.*
+
+# Misc - images and screenshots
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.icloud
+
+# Replit specific
+.replit
+
+# Documentation files (can be uncommented if you want to include them)
+# BACKEND_SETUP.md
+# INTEGRATION_SUMMARY.md
+# SETUP_FIXES.md

@@ -6,35 +6,72 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, TrendingUp, UserPlus } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import adImage from '@/../../apple-back-to-school-promotion (1).webp';
+import { useQuery } from "@tanstack/react-query";
+import { api, endpoints } from "@/lib/api";
 
 export default function Community() {
+  // Fetch community feed from backend
+  const { data: backendPosts, isLoading, error } = useQuery({
+    queryKey: ['feed', 'list'],
+    queryFn: () => api.get(endpoints.feed.list),
+    retry: false,
+  });
+
+  // Debug logging
+  if (error) {
+    console.log('Community page error:', error);
+  }
+  if (backendPosts) {
+    console.log('Community posts from backend:', backendPosts);
+  }
+
+  // Use backend data if available, otherwise fall back to mock data
+  // Backend might return data in {posts: [...]} or {data: [...]} format
+  let displayPosts = posts; // default to mock
+  if (backendPosts) {
+    if (Array.isArray(backendPosts)) {
+      displayPosts = backendPosts;
+    } else if (backendPosts.posts && Array.isArray(backendPosts.posts)) {
+      displayPosts = backendPosts.posts;
+    } else if (backendPosts.data && Array.isArray(backendPosts.data)) {
+      displayPosts = backendPosts.data;
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-background pl-[4.5rem]">
+    <div className="min-h-screen bg-white pl-[4.5rem]">
       <Sidebar />
-      
+
       <main className="container mx-auto px-4 pt-6 pb-20 max-w-6xl flex gap-8 justify-center">
-        
+
         {/* Main Feed */}
         <div className="flex-1 max-w-xl w-full">
           <Tabs defaultValue="foryou" className="w-full mb-6">
             <div className="flex justify-between items-center mb-4 px-2">
-              <h1 className="text-2xl font-heading font-bold">Community</h1>
+              <h1 className="text-2xl font-heading font-bold text-foreground">Community</h1>
               <TabsList className="bg-muted/50">
-                <TabsTrigger value="foryou" className="rounded-sm px-6">For You</TabsTrigger>
-                <TabsTrigger value="following" className="rounded-sm px-6">Following</TabsTrigger>
+                <TabsTrigger value="foryou" className="rounded-sm px-6 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">For You</TabsTrigger>
+                <TabsTrigger value="following" className="rounded-sm px-6 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Following</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <div className="bg-background border rounded-xl overflow-hidden shadow-sm mb-6">
               <CreatePost />
             </div>
 
             <TabsContent value="foryou" className="space-y-0 mt-0 border rounded-xl overflow-hidden shadow-sm bg-background">
-              {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
+              {isLoading ? (
+                <div className="text-center py-10">
+                  <div className="text-lg text-muted-foreground">Loading posts...</div>
+                </div>
+              ) : (
+                displayPosts.map((post: any) => (
+                  <PostCard key={post.id} post={post} />
+                ))
+              )}
             </TabsContent>
             
             <TabsContent value="following" className="mt-0">
@@ -53,33 +90,25 @@ export default function Community() {
             <Input placeholder="Search topics" className="pl-9 bg-muted/30 border-none shadow-sm" />
           </div>
 
-          {/* Trending */}
-          <Card className="shadow-sm border-border/60">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" /> Trending Topics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {['#HousingFair2025', '#FinalsWeek', '#CampusFood', '#RoommateSearch', '#SpringBreak'].map((topic, i) => (
-                <div key={topic} className="flex justify-between items-center cursor-pointer group">
-                  <div>
-                    <p className="text-sm font-medium group-hover:text-primary transition-colors">{topic}</p>
-                    <p className="text-xs text-muted-foreground">{1000 - i * 150} posts</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    +
-                  </Button>
-                </div>
-              ))}
+          {/* Advertisement */}
+          <Card className="shadow-sm border-border/60 bg-card overflow-hidden">
+            <CardContent className="p-0">
+              <img
+                src={adImage}
+                alt="Back to School Promotion"
+                className="w-full h-auto object-cover cursor-pointer hover:opacity-95 transition-opacity"
+              />
+              <div className="px-4 py-2 bg-muted/30 text-center">
+                <p className="text-xs text-muted-foreground">Sponsored</p>
+              </div>
             </CardContent>
           </Card>
 
           {/* Suggested Users */}
-          <Card className="shadow-sm border-border/60">
+          <Card className="shadow-sm border-border/60 bg-card">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <UserPlus className="h-4 w-4" /> Suggested for you
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
+                <UserPlus className="h-4 w-4 text-foreground" /> Suggested for you
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -95,7 +124,7 @@ export default function Community() {
                       <p className="text-xs text-muted-foreground truncate">{user.handle}</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="h-8 px-3 rounded-full font-semibold">
+                  <Button variant="outline" size="sm" className="h-8 px-3 rounded-full font-semibold bg-foreground/10 border-foreground text-foreground hover:bg-primary hover:text-primary-foreground hover:border-foreground transition-all">
                     Follow
                   </Button>
                 </div>

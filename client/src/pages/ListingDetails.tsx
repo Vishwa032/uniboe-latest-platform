@@ -4,9 +4,9 @@ import Sidebar from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Share, Heart, Star, MapPin, ShieldCheck, 
-  Wifi, Utensils, Wind, Thermometer, Calendar, User
+import {
+  Share, Heart, Star, MapPin, ShieldCheck,
+  Wifi, Utensils, Wind, Thermometer, Calendar, User, MessageCircle
 } from "lucide-react";
 import {
   Card,
@@ -18,16 +18,47 @@ import {
 } from "@/components/ui/card";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api, endpoints } from "@/lib/api";
 
 export default function ListingDetails() {
   const { id } = useParams();
-  const listing = listings.find((l) => l.id === id) || listings[0];
   const [date, setDate] = useState<Date | undefined>(new Date());
+
+  // Fetch listing details from backend
+  const { data: backendListing, isLoading, error } = useQuery({
+    queryKey: ['housing', id],
+    queryFn: () => api.get(endpoints.housing.details(id as string)),
+    retry: false,
+    enabled: !!id,
+  });
+
+  // Debug logging
+  if (error) {
+    console.log('ListingDetails page error:', error);
+  }
+  if (backendListing) {
+    console.log('Listing details from backend:', backendListing);
+  }
+
+  // Use backend data if available, otherwise fall back to mock data
+  const listing = backendListing || listings.find((l) => l.id === id) || listings[0];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white pb-20 pl-[4.5rem] flex items-center justify-center">
+        <Sidebar />
+        <div className="text-center">
+          <div className="text-lg text-muted-foreground">Loading listing details...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!listing) return <div>Listing not found</div>;
 
   return (
-    <div className="min-h-screen bg-background pb-20 pl-[4.5rem]">
+    <div className="min-h-screen bg-white pb-20 pl-[4.5rem]">
       <Sidebar />
       
       <main className="container mx-auto px-4 pt-6 max-w-6xl">
@@ -72,7 +103,7 @@ export default function ListingDetails() {
             <img src={listing.images[1]} alt="Sub 4" className="w-full h-full object-cover hover:opacity-95 transition-opacity cursor-pointer" />
           </div>
           
-          <Button variant="secondary" className="absolute bottom-4 right-4 gap-2 shadow-md border border-black/10">
+          <Button className="absolute bottom-4 right-4 gap-2 shadow-md bg-secondary text-foreground hover:bg-primary hover:text-primary-foreground transition-all font-semibold">
              Show all photos
           </Button>
         </div>
@@ -86,7 +117,7 @@ export default function ListingDetails() {
             {/* Host Info */}
             <div className="flex justify-between items-center py-4 border-b">
               <div>
-                <h2 className="text-xl font-semibold">Hosted by {listing.host.name}</h2>
+                <h2 className="text-xl font-semibold">Listed by {listing.host.name}</h2>
                 <p className="text-muted-foreground">
                   {listing.bedrooms} bedrooms · {listing.bathrooms} baths · {listing.type}
                 </p>
@@ -94,7 +125,7 @@ export default function ListingDetails() {
               <Avatar className="h-14 w-14">
                 <AvatarImage src={listing.host.avatar} />
                 <AvatarFallback>
-                  {listing.host.name.split(' ').map(n => n[0]).join('')}
+                  {listing.host.name.split(' ').map((n: string) => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -102,21 +133,21 @@ export default function ListingDetails() {
             {/* Key Features */}
             <div className="space-y-6 border-b pb-8">
               <div className="flex gap-4">
-                <div className="mt-1"><ShieldCheck className="h-6 w-6" /></div>
+                <div className="mt-1"><ShieldCheck className="h-6 w-6 text-secondary" /></div>
                 <div>
                   <h3 className="font-semibold">Verified Student Housing</h3>
                   <p className="text-muted-foreground text-sm">Verified for safety and university proximity.</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="mt-1"><MapPin className="h-6 w-6" /></div>
+                <div className="mt-1"><MapPin className="h-6 w-6 text-secondary" /></div>
                 <div>
                   <h3 className="font-semibold">Great Location</h3>
                   <p className="text-muted-foreground text-sm">100% of recent guests gave the location a 5-star rating.</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <div className="mt-1"><Calendar className="h-6 w-6" /></div>
+                <div className="mt-1"><Calendar className="h-6 w-6 text-secondary" /></div>
                 <div>
                   <h3 className="font-semibold">Academic Lease Terms</h3>
                   <p className="text-muted-foreground text-sm">Lease aligns with university semester dates.</p>
@@ -138,7 +169,7 @@ export default function ListingDetails() {
             <div className="border-b pb-8">
               <h2 className="text-xl font-semibold mb-6">What this place offers</h2>
               <div className="grid grid-cols-2 gap-4">
-                {listing.amenities.map((amenity) => (
+                {listing.amenities.map((amenity: string) => (
                   <div key={amenity} className="flex items-center gap-3 text-muted-foreground">
                     {amenity === 'Wifi' && <Wifi className="h-5 w-5" />}
                     {amenity === 'Kitchen' && <Utensils className="h-5 w-5" />}
@@ -149,7 +180,7 @@ export default function ListingDetails() {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="mt-8 rounded-lg font-semibold">
+              <Button variant="outline" className="mt-8 rounded-lg font-semibold bg-card border-secondary text-foreground hover:bg-secondary hover:border-secondary">
                 Show all {listing.amenities.length} amenities
               </Button>
             </div>
@@ -182,35 +213,24 @@ export default function ListingDetails() {
                       <label className="text-[10px] font-bold uppercase text-muted-foreground block">Move-out</label>
                       <span className="text-sm">May 31, 2026</span>
                     </div>
-                    <div className="col-span-2 p-3">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground block">Guests</label>
-                      <span className="text-sm">1 student</span>
+                    <div className="p-3 border-r">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground block">Bedrooms</label>
+                      <span className="text-sm">{listing.bedrooms === 0 ? 'Studio' : listing.bedrooms}</span>
+                    </div>
+                    <div className="p-3">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground block">Bathrooms</label>
+                      <span className="text-sm">{listing.bathrooms}</span>
+                    </div>
+                    <div className="col-span-2 p-3 border-t">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground block">Square Feet</label>
+                      <span className="text-sm">{listing.sqft || 'N/A'} sq ft</span>
                     </div>
                   </div>
                   
-                  <Button className="w-full h-12 text-lg font-bold rounded-lg bg-primary hover:bg-primary/90">
-                    Reserve
+                  <Button className="w-full h-12 text-lg font-bold rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_4px_20px_rgba(217,136,106,0.25)] hover:shadow-[0_6px_24px_rgba(217,136,106,0.35)] transition-all gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Send message
                   </Button>
-                  
-                  <p className="text-center text-xs text-muted-foreground">
-                    You won't be charged yet
-                  </p>
-                  
-                  <div className="space-y-3 pt-2">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span className="underline">${listing.price} x 9 months</span>
-                      <span>${listing.price * 9}</span>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span className="underline">Service fee</span>
-                      <span>$0</span>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total</span>
-                      <span>${listing.price * 9}</span>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>

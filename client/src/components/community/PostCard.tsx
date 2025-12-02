@@ -4,49 +4,93 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Heart, MessageCircle, Repeat, Share, MoreHorizontal, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatTimestamp } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, endpoints } from "@/lib/api";
 
 interface PostCardProps {
   post: Post;
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(post.likes);
+  const queryClient = useQueryClient();
 
-  const handleLike = () => {
+  // Handle different data formats from backend (cast to any for flexibility)
+  const postData = post as any;
+
+  const [liked, setLiked] = useState(postData.is_liked_by_current_user || false);
+  const [likesCount, setLikesCount] = useState(postData.like_count || post.likes || 0);
+
+  const author = post.author || {
+    name: postData.user?.full_name || postData.user_name || 'Unknown User',
+    avatar: postData.user?.profile_picture_url || postData.user_avatar || 'https://github.com/shadcn.png',
+    isVerified: postData.user?.is_verified || false
+  };
+  const comments = post.comments || [];
+  const commentsCount = postData.comment_count || comments.length || 0;
+
+  // Handle backend media_urls array or mock image field
+  const hasMedia = (postData.media_urls && postData.media_urls.length > 0) || post.image;
+  const mediaUrls = postData.media_urls || (post.image ? [post.image] : []);
+  const mediaTypes = postData.media_types || (post.image ? ['image'] : []);
+
+  // Mutation for liking/unliking posts
+  const likeMutation = useMutation({
+    mutationFn: () => api.post(endpoints.feed.like(post.id)),
+    onSuccess: () => {
+      // Invalidate feed query to refetch posts with updated like status
+      queryClient.invalidateQueries({ queryKey: ['feed', 'list'] });
+      queryClient.invalidateQueries({ queryKey: ['feed', 'user-posts'] });
+    },
+    onError: (error) => {
+      console.error('Failed to toggle like:', error);
+      // Revert optimistic update on error
+      setLiked(!liked);
+      setLikesCount(liked ? likesCount + 1 : likesCount - 1);
+    },
+  });
+
+  const handleLike = async () => {
+    // Optimistic update
     if (liked) {
       setLikesCount(likesCount - 1);
     } else {
       setLikesCount(likesCount + 1);
     }
     setLiked(!liked);
+
+    // Send to backend
+    try {
+      await likeMutation.mutateAsync();
+    } catch (error) {
+      // Error handling is done in onError callback
+    }
   };
 
   return (
-    <Card className="border-b border-x-0 border-t-0 rounded-none shadow-none hover:bg-muted/5 transition-colors">
+    <Card className="border-b border-x-0 border-t-0 rounded-none shadow-none bg-muted/5">
       <div className="flex gap-4 p-4">
         <div className="flex flex-col items-center gap-2">
           <Avatar className="h-10 w-10 border cursor-pointer">
-            <AvatarImage src={post.author.avatar} />
-            <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+            <AvatarImage src={author.avatar} />
+            <AvatarFallback>{author.name[0]}</AvatarFallback>
           </Avatar>
-          {post.comments.length > 0 && (
+          {comments.length > 0 && (
             <div className="w-0.5 h-full bg-border/50 rounded-full mt-2" />
           )}
         </div>
-        
+
         <div className="flex-1 space-y-2">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm hover:underline cursor-pointer">
-                {post.author.name}
+                {author.name}
               </span>
-              {post.author.isVerified && (
+              {author.isVerified && (
                 <CheckCircle2 className="h-3.5 w-3.5 text-blue-500 fill-blue-500/10" />
               )}
               <span className="text-muted-foreground text-sm">
-                {post.timestamp}
+                {postData.created_at ? formatTimestamp(postData.created_at) : (post.timestamp || 'Just now')}
               </span>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-muted-foreground">
@@ -58,13 +102,24 @@ export default function PostCard({ post }: PostCardProps) {
             {post.content}
           </p>
 
-          {post.type === 'image' && post.image && (
-            <div className="mt-3 rounded-xl overflow-hidden border">
-              <img 
-                src={post.image} 
-                alt="Post content" 
-                className="w-full max-h-[500px] object-cover"
-              />
+          {/* Display images from backend media_urls or mock image field */}
+          {hasMedia && mediaUrls.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {mediaUrls.map((url: string, index: number) => {
+                const mediaType = mediaTypes[index] || 'image';
+                if (mediaType === 'image') {
+                  return (
+                    <div key={index} className="rounded-xl overflow-hidden border">
+                      <img
+                        src={url}
+                        alt={`Post media ${index + 1}`}
+                        className="w-full max-h-[500px] object-cover"
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })}
             </div>
           )}
 
@@ -93,27 +148,27 @@ export default function PostCard({ post }: PostCardProps) {
           )}
 
           <div className="flex gap-6 mt-3 -ml-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={cn("gap-1.5 rounded-full h-9 px-2 hover:text-red-500 hover:bg-red-500/10", liked && "text-red-500")}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("gap-1.5 rounded-full h-9 px-2 hover:text-primary hover:bg-primary/10 transition-all", liked && "text-primary")}
               onClick={handleLike}
             >
               <Heart className={cn("h-5 w-5", liked && "fill-current")} />
               <span className="text-sm tabular-nums">{likesCount}</span>
             </Button>
-            
-            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 hover:text-blue-500 hover:bg-blue-500/10">
+
+            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 hover:text-primary hover:bg-primary/10 transition-all">
               <MessageCircle className="h-5 w-5" />
-              <span className="text-sm tabular-nums">{post.comments.length}</span>
+              <span className="text-sm tabular-nums">{commentsCount}</span>
             </Button>
-            
-            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 hover:text-green-500 hover:bg-green-500/10">
+
+            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 hover:text-primary hover:bg-primary/10 transition-all">
               <Repeat className="h-5 w-5" />
-              <span className="text-sm tabular-nums">{post.shares}</span>
+              <span className="text-sm tabular-nums">{post.shares || 0}</span>
             </Button>
-            
-            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 ml-auto">
+
+            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-9 px-2 ml-auto hover:text-primary hover:bg-primary/10 transition-all">
               <Share className="h-4 w-4" />
             </Button>
           </div>

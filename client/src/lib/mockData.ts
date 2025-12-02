@@ -1,8 +1,8 @@
-import heroImage from '@assets/generated_images/modern_university_housing_exterior_with_students.png';
 import studioImage from '@assets/generated_images/modern_bright_studio_apartment_interior.png';
 import cozyImage from '@assets/generated_images/cozy_student_apartment_living_room.png';
 import luxuryImage from '@assets/generated_images/luxury_student_dormitory_lounge.png';
-import townhouseImage from '@assets/generated_images/brick_townhouse_exterior.png';
+import dormImage from '@assets/generated_images/dorm_room_desk_setup.png';
+import libraryImage from '@assets/generated_images/students_studying_in_library.png';
 
 export type Listing = {
   id: string;
@@ -59,7 +59,7 @@ export const listings: Listing[] = [
     type: 'Apartment',
     rating: 4.6,
     reviewsCount: 18,
-    images: [cozyImage, townhouseImage, studioImage],
+    images: [cozyImage, dormImage, studioImage],
     amenities: ['Wifi', 'Kitchen', 'Heating', 'Smoke alarm', 'Carbon monoxide alarm'],
     host: {
       name: 'David Chen',
@@ -101,7 +101,7 @@ export const listings: Listing[] = [
     type: 'House',
     rating: 4.7,
     reviewsCount: 12,
-    images: [townhouseImage, cozyImage, luxuryImage],
+    images: [libraryImage, cozyImage, luxuryImage],
     amenities: ['Wifi', 'Kitchen', 'Garden', 'Washer', 'Dryer', 'Heating'],
     host: {
       name: 'James Wilson',
@@ -122,7 +122,7 @@ export const listings: Listing[] = [
     type: 'Apartment',
     rating: 4.5,
     reviewsCount: 8,
-    images: [cozyImage, studioImage, townhouseImage],
+    images: [cozyImage, studioImage, dormImage],
     amenities: ['Wifi', 'Kitchen', 'Elevator', 'Air conditioning', 'Dishwasher'],
     host: {
       name: 'Metro Properties',

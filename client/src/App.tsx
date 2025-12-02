@@ -4,24 +4,74 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import Home from "@/pages/Home";
+import Landing from "@/pages/Landing";
+import Housing from "@/pages/Housing";
 import ListingDetails from "@/pages/ListingDetails";
 import Auth from "@/pages/Auth";
 import HostDashboard from "@/pages/HostDashboard";
 import Community from "@/pages/Community";
 import Messages from "@/pages/Messages";
 import Olive from "@/pages/Olive";
+import Profile from "@/pages/Profile";
+import EditProfile from "@/pages/EditProfile";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/olive" component={Olive} />
-      <Route path="/community" component={Community} />
-      <Route path="/messages" component={Messages} />
-      <Route path="/listing/:id" component={ListingDetails} />
+      {/* Public routes */}
+      <Route path="/" component={Landing} />
       <Route path="/auth" component={Auth} />
-      <Route path="/host" component={HostDashboard} />
+
+      {/* Protected routes - require authentication */}
+      <Route path="/housing">
+        <ProtectedRoute>
+          <Housing />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/olive">
+        <ProtectedRoute>
+          <Olive />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/community">
+        <ProtectedRoute>
+          <Community />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/messages">
+        <ProtectedRoute>
+          <Messages />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/profile">
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/profile/edit">
+        <ProtectedRoute>
+          <EditProfile />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/listing/:id">
+        <ProtectedRoute>
+          <ListingDetails />
+        </ProtectedRoute>
+      </Route>
+
+      <Route path="/host">
+        <ProtectedRoute>
+          <HostDashboard />
+        </ProtectedRoute>
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

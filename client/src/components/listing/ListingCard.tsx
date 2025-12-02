@@ -41,16 +41,16 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/10 text-white backdrop-blur-sm hover:bg-white hover:text-primary hover:scale-110 transition-all"
+            className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/10 text-white backdrop-blur-sm hover:bg-white hover:text-primary hover:scale-110 transition-all group/heart"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
             }}
           >
-            <Heart className="h-5 w-5" />
+            <Heart className="h-5 w-5 group-hover/heart:fill-primary transition-all" />
           </Button>
-          
-          <div className="absolute top-3 left-3 rounded-md bg-white/90 px-2 py-1 text-xs font-bold uppercase backdrop-blur-sm">
+
+          <div className="absolute top-3 left-3 rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
             {listing.type}
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </p>
           
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="font-semibold text-lg">${listing.price}</span>
+            <span className="font-semibold text-lg text-foreground">${listing.price}</span>
             <span className="text-muted-foreground">/ month</span>
           </div>
         </div>
