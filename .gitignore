@@ -82,10 +82,10 @@ $RECYCLE.BIN/
 vite.config.ts.*
 
 # Misc - images and screenshots
-*.png
-*.jpg
-*.jpeg
-*.webp
+# *.png
+# *.jpg
+# *.jpeg
+# *.webp
 *.icloud
 
 # Replit specific
